@@ -1,3 +1,7 @@
+*{
+    font-size: 30px;
+}
+
 .grid{
     display: grid;
     grid-template-columns: repeat(7, 110px);
@@ -6,14 +10,14 @@
     height: 660px;
     margin: 0 auto;
     justify-content: center;
-    background-color: black;
+    background-color: rgb(2, 40, 145);
 }
 
 .cell{
-    border:5px solid black;
+    border:5px solid rgb(44, 89, 214);
     background-color: white;
     border-radius: 50%;
-    outline:  5px solid black;
+    outline:  5px solid rgb(16, 70, 172);
 }
 
 .cell:hover{
@@ -51,3 +55,11 @@ button:last-child {
     height: 100vh;
   }
   
+  #right-container {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 300px; /* adjust this to your preference */
+    height: 100vh; /* adjust this to your preference */
+    /* add any other styles you want here */
+}
