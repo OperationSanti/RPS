@@ -15,6 +15,7 @@ $(document).ready(function(){
     $(".cell").each(function(){
         $(this).attr("id", count);
         $(this).attr("data-player", 0);
+        $(this).attr("disabled", true); // disable the cells initially
         count++;
     });
 
@@ -29,10 +30,13 @@ $(document).ready(function(){
         clearInterval(player2TimerInterval);
         gameTimerInterval = setInterval(updateGameTimer, 1000);
         player1TimerInterval = setInterval(updatePlayer1Timer, 1000);
+        $("#pause").removeAttr("disabled"); // enable the Pause button
+        $("#reset").removeAttr("disabled"); // enable the Reset button
         $(".cell").css("background-color", "white");
         $(".cell").attr("data-player", 0);
+        $(".cell").removeAttr("disabled"); // enable the cells
     }
-
+    
     function resetGame() {
         startGame();
         clearInterval(gameTimerInterval);
@@ -41,6 +45,9 @@ $(document).ready(function(){
         $("#player1-time").text("Player 1 time: 00:00:00");
         $("#player2-time").text("Player 2 time: 00:00:00");
         $("#game-time").text("Game time: 00:00:00");
+        $(".cell").attr("disabled", true); // disable the cells
+        $("#pause").attr("disabled", true); // disable the Pause button
+        $("#reset").attr("disabled", true); // disable the Reset button
     }
 
     function updateGameTimer() {
@@ -53,15 +60,32 @@ $(document).ready(function(){
         if (player === 1 && winner === 0) {
             player1Time++;
             $("#player1-time").text("Player 1 time: " + formatTime(player1Time * 1000));
+            if (checkWin(player)) {
+                clearInterval(gameTimerInterval);
+                clearInterval(player1TimerInterval);
+                clearInterval(player2TimerInterval);
+                var winTime = formatTime(player1Time * 1000);
+                alert("Player 1 wins! Time: " + winTime);
+                winner = player;
+            }
         }
     }
-
+    
     function updatePlayer2Timer() {
         if (player === -1 && winner === 0) {
             player2Time++;
             $("#player2-time").text("Player 2 time: " + formatTime(player2Time * 1000));
+            if (checkWin(player)) {
+                clearInterval(gameTimerInterval);
+                clearInterval(player1TimerInterval);
+                clearInterval(player2TimerInterval);
+                var winTime = formatTime(player2Time * 1000);
+                alert("Player 2 wins! Time: " + winTime);
+                winner = player;
+            }
         }
     }
+    
 
     function formatTime(time) {
         var date = new Date(time);
@@ -73,13 +97,18 @@ $(document).ready(function(){
 
     $("#start").click(function() {
         startGame();
+        $("#start").attr("disabled", true); // disable the Start button after it's pressed
     });
 
     $("#reset").click(function() {
         resetGame();
+        $("#start").removeAttr("disabled"); // enable the Start button after the game is reset
     });
 
     $(".cell").click(function(){
+        if ($("#start").attr("disabled") !== "disabled" || isValid($(this).attr("id")) === false) {
+            return; // disable the cells before Start button is pressed or if it's not a valid move
+        }
         if(isValid($(this).attr("id"))){
             $(this).css("background-color", colors[player]);
             $(this).attr("data-player", player);
@@ -95,92 +124,91 @@ $(document).ready(function(){
                 } else {
                     updatePlayer1Timer();
                 }
-                player
-                *= -1;
+                player *= -1;
             }
         }
     });
-    
-    function isValid(n){
-        var id = parseInt(n);
-        if(winner !== 0){
+        
+        function isValid(n){
+            var id = parseInt(n);
+            if(winner !== 0){
+                return false;
+            }
+            if($("#" + id).attr("data-player") === "0"){
+                if(id >= 35){
+                    return true;
+                }
+                if($("#" + (id + 7)).attr("data-player") !== "0"){
+                    return true;
+                }
+            }
             return false;
         }
-        if($("#" + id).attr("data-player") === "0"){
-            if(id >= 35){
-                return true;
-            }
-            if($("#" + (id + 7)).attr("data-player") !== "0"){
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    function checkWin(p){
-        //check rows
-        var chain = 0; 
-        for(var i = 0; i < 42; i+=7){
-            for(var j = 0; j < 7; j++){
-                var cell = $("#" + (i+j));
-                if(cell.attr("data-player") == p){
-                    chain++;
-                }else{
-                    chain=0;
+        
+        function checkWin(p){
+            //check rows
+            var chain = 0; 
+            for(var i = 0; i < 42; i+=7){
+                for(var j = 0; j < 7; j++){
+                    var cell = $("#" + (i+j));
+                    if(cell.attr("data-player") == p){
+                        chain++;
+                    }else{
+                        chain=0;
+                    }
+        
+                    if(chain >= 4){
+                        return true;
+                    }
                 }
-    
-                if(chain >= 4){
-                    return true;
-                }
+                chain = 0;
             }
+        
+            //check columns
             chain = 0;
-        }
-    
-        //check columns
-        chain = 0;
-        for(var i = 0; i < 7; i++){
-            for(var j = 0; j < 42; j+=7){
-                var cell = $("#" + (i + j));
-                if(cell.attr("data-player") == p){
-                    chain++;
-                }else{
-                    chain = 0;
+            for(var i = 0; i < 7; i++){
+                for(var j = 0; j < 42; j+=7){
+                    var cell = $("#" + (i + j));
+                    if(cell.attr("data-player") == p){
+                        chain++;
+                    }else{
+                        chain = 0;
+                    }
+        
+                    if(chain >= 4){
+                        return true;
+                    }
                 }
-    
-                if(chain >= 4){
-                    return true;
-                }
+                chain = 0;
             }
-            chain = 0;
-        }
-    
-        //check diagonals
-        var topLeft = 0;
-        var topRight = topLeft + 3;
-    
-        for(var i = 0; i <3; i++){
-            for(var j = 0; j < 4; j++){
-                if($("#" + topLeft).attr("data-player") == p
-                && $("#" + (topLeft + 8)).attr("data-player") == p
-                && $("#" + (topLeft + 16)).attr("data-player") == p
-                && $("#" + (topLeft + 24)).attr("data-player") == p){
-                    return true;
+        
+            //check diagonals
+            var topLeft = 0;
+            var topRight = topLeft + 3;
+        
+            for(var i = 0; i <3; i++){
+                for(var j = 0; j < 4; j++){
+                    if($("#" + topLeft).attr("data-player") == p
+                    && $("#" + (topLeft + 8)).attr("data-player") == p
+                    && $("#" + (topLeft + 16)).attr("data-player") == p
+                    && $("#" + (topLeft + 24)).attr("data-player") == p){
+                        return true;
+                    }
+        
+                    if($("#" + topRight).attr("data-player") == p
+                    && $("#" + (topRight + 6)).attr("data-player") == p
+                    && $("#" + (topRight + 12)).attr("data-player") == p
+                    && $("#" + (topRight + 18)).attr("data-player") == p){
+                        return true;
+                    }
+        
+                    topLeft++;
+                    topRight = topLeft + 3;
                 }
-    
-                if($("#" + topRight).attr("data-player") == p
-                && $("#" + (topRight + 6)).attr("data-player") == p
-                && $("#" + (topRight + 12)).attr("data-player") == p
-                && $("#" + (topRight + 18)).attr("data-player") == p){
-                    return true;
-                }
-    
-                topLeft++;
+                topLeft = i * 7 + 7;
                 topRight = topLeft + 3;
             }
-            topLeft = i * 7 + 7;
-            topRight = topLeft + 3;
+            
+            return false;
         }
-        
-        return false;
-    }
-});
+    }); 
