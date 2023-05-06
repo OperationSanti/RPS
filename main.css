@@ -2,6 +2,10 @@
     font-size: 30px;
 }
 
+#red{
+    color: red;
+}
+
 .grid{
     display: grid;
     grid-template-columns: repeat(7, 110px);
@@ -55,11 +59,3 @@ button:last-child {
     height: 100vh;
   }
   
-  #right-container {
-    position: absolute;
-    right: 0;
-    top: 0;
-    width: 300px; /* adjust this to your preference */
-    height: 100vh; /* adjust this to your preference */
-    /* add any other styles you want here */
-}
