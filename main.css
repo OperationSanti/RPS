@@ -59,3 +59,18 @@ button:last-child {
     height: 100vh;
   }
   
+  .disabled {
+    pointer-events: none;
+    opacity: 0%;
+  }
+
+  .scrollable-container{
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .scrollable-container:-webkit-scrollbar {
+    display: none;
+  }
